@@ -1,31 +1,34 @@
-import React, {Component} from 'react';
-import {Button, Card, message, Table, Tooltip} from 'antd';
-import {DeleteOutlined, EyeOutlined} from '@ant-design/icons';
-import axios from 'axios';
+import React, { Component } from 'react';
+import { Button, Card, message, Table, Tooltip } from 'antd';
+import { DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
 import UserView from './UserView';
 import Loading from 'components/shared-components/Loading/index.js';
+import UserService from 'services/UserService';
+import { Link } from 'react-router-dom';
 
-export class UserList extends Component {
+class UserList extends Component {
 	state = {
 		users: [],
 		userProfileVisible: false,
 		selectedUser: null,
-		loading: true, // Add loading state
+		loading: true,
 	};
 	
 	componentDidMount() {
-		axios
-			.get('https://jsonplaceholder.typicode.com/users')
-			.then((response) => {
-				this.setState({
-					users: response.data,
-					loading: false
-				});
-			})
-			.catch((error) => {
-				console.error('Ошибка при получении пользователей:', error);
-				this.setState({loading: false});
+		this.fetchUsers();
+	}
+	
+	async fetchUsers() {
+		try {
+			const users = await UserService.getUsers();
+			this.setState({
+				users,
+				loading: false,
 			});
+		} catch (error) {
+			console.error('Ошибка при получении пользователей:', error);
+			this.setState({ loading: false });
+		}
 	}
 	
 	deleteUser = (userId) => {
@@ -53,16 +56,10 @@ export class UserList extends Component {
 	};
 	
 	render() {
-		const {
-			users,
-			userProfileVisible,
-			selectedUser,
-			loading
-		} = this.state;
+		const { users, userProfileVisible, selectedUser, loading } = this.state;
 		
-		// Display Loading component while fetching users
 		if (loading) {
-			return <Loading/>;
+			return <Loading />;
 		}
 		
 		const columns = Object.keys(users.length > 0 ? users[0] : {}).map((key) => {
@@ -100,17 +97,27 @@ export class UserList extends Component {
 						<Button
 							type="primary"
 							className="mr-2"
-							icon={<EyeOutlined/>}
+							icon={<EyeOutlined />}
 							onClick={() => {
 								this.showUserProfile(elm);
 							}}
 							size="small"
 						/>
 					</Tooltip>
+					<Link to={`/main/clients/edit/${elm.id}`}>
+						<Tooltip title="Редактирование">
+							<Button
+								type="primary"
+								className="mr-2"
+								icon={<EditOutlined />}
+								size="small"
+							/>
+						</Tooltip>
+					</Link>
 					<Tooltip title="Удаление">
 						<Button
 							danger
-							icon={<DeleteOutlined/>}
+							icon={<DeleteOutlined />}
 							onClick={() => {
 								this.deleteUser(elm.id);
 							}}
@@ -122,10 +129,9 @@ export class UserList extends Component {
 		});
 		
 		return (
-			<Card bodyStyle={{padding: '0px'}}>
-				<Table columns={columns} dataSource={users} rowKey="id"/>
-				<UserView data={selectedUser} visible={userProfileVisible}
-				          close={this.closeUserProfile}/>
+			<Card bodyStyle={{ padding: '0px' }}>
+				<Table columns={columns} dataSource={users} rowKey="id" />
+				<UserView data={selectedUser} visible={userProfileVisible} close={this.closeUserProfile} />
 			</Card>
 		);
 	}
