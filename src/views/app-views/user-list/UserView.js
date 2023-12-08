@@ -16,13 +16,13 @@ export class UserView extends Component {
 				</div>
 				<Divider dashed />
 				<div className="">
-					<h6 className="text-muted text-uppercase mb-3">Детали учетной записи</h6>
+					<h6 className="text-muted text-uppercase mb-3">Account Details</h6>
 					<p>
-						<span className="ml-3 text-dark">Место работы: {company.name}</span>
+						<span className="ml-3 text-dark">Company: {company.name}</span>
 					</p>
 				</div>
 				<div className="mt-5">
-					<h6 className="text-muted text-uppercase mb-3">КОНТАКТЫ</h6>
+					<h6 className="text-muted text-uppercase mb-3">Contacts</h6>
 					<p>
 						<MobileOutlined />
 						<span className="ml-3 text-dark">{data?.phone}</span>
@@ -33,7 +33,7 @@ export class UserView extends Component {
 					</p>
 					<p>
 						<CompassOutlined />
-						<span className="ml-3 text-dark">{`${address?.city}, Геолокация ${address?.geo?.lat}, ${address?.geo?.lng} , код ${address.zipcode}`}</span>
+						<span className="ml-3 text-dark">{`${address?.city}, Geolocation ${address?.geo?.lat}, ${address?.geo?.lng}, Zip Code ${address.zipcode}`}</span>
 					</p>
 				</div>
 			</Drawer>

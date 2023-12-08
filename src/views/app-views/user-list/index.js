@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Card, message, Table, Tooltip } from 'antd';
-import { DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 import UserView from './UserView';
 import Loading from 'components/shared-components/Loading/index.js';
 import UserService from 'services/UserService';
@@ -26,7 +26,7 @@ class UserList extends Component {
 				loading: false,
 			});
 		} catch (error) {
-			console.error('Ошибка при получении пользователей:', error);
+			console.error('Error fetching users:', error);
 			this.setState({ loading: false });
 		}
 	}
@@ -36,7 +36,7 @@ class UserList extends Component {
 			users: this.state.users.filter((item) => item.id !== userId),
 		});
 		message.success({
-			content: `Пользователь ${userId} удален`,
+			content: `User ${userId} deleted`,
 			duration: 2,
 		});
 	};
@@ -65,14 +65,14 @@ class UserList extends Component {
 		const columns = Object.keys(users.length > 0 ? users[0] : {}).map((key) => {
 			if (key === 'address') {
 				return {
-					title: 'Адрес',
+					title: 'Address',
 					dataIndex: 'address',
 					key: 'address',
 					render: (address) => address?.city,
 				};
 			} else if (key === 'company') {
 				return {
-					title: 'Компания',
+					title: 'Company',
 					dataIndex: 'company',
 					key: 'company',
 					render: (company) => company?.name,
@@ -89,11 +89,11 @@ class UserList extends Component {
 		}).filter((column) => column !== null);
 		
 		columns.push({
-			title: 'Действия',
+			title: 'Actions',
 			dataIndex: 'actions',
 			render: (_, elm) => (
 				<div className="text-right">
-					<Tooltip title="Просмотр">
+					<Tooltip title="View">
 						<Button
 							type="primary"
 							className="mr-2"
@@ -104,17 +104,17 @@ class UserList extends Component {
 							size="small"
 						/>
 					</Tooltip>
-					<Link to={`/main/clients/edit/${elm.id}`}>
-						<Tooltip title="Редактирование">
-							<Button
-								type="primary"
-								className="mr-2"
-								icon={<EditOutlined />}
-								size="small"
-							/>
-						</Tooltip>
+					<Link to={`/app/main/clients/edit/${elm.id}`}>
+						<Button
+							type="primary"
+							className="mr-2"
+							icon={<EditOutlined />}
+							size="small"
+						>
+							Edit
+						</Button>
 					</Link>
-					<Tooltip title="Удаление">
+					<Tooltip title="Delete">
 						<Button
 							danger
 							icon={<DeleteOutlined />}

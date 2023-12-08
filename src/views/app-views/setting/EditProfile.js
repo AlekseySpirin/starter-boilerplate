@@ -1,22 +1,23 @@
 import React, {Component} from 'react';
-import {Avatar, Button, Form, message, Upload} from 'antd';
-import {UserOutlined} from '@ant-design/icons';
-import Flex from 'components/shared-components/Flex';
+import {Button, Form, Input, message} from 'antd';
 import UserService from 'services/UserService';
+import {withRouter} from 'react-router-dom';
 
 class EditProfile extends Component {
 	state = {
-		avatarUrl: '/img/avatars/thumb-6.jpg',
-		name: 'Charlie Howard',
-		email: 'charlie.howard@themenate.com',
-		userName: 'Charlie',
+		avatarUrl: '',
+		name: '',
+		email: '',
+		userName: '',
 		dateOfBirth: null,
-		phoneNumber: '+44 (1532) 135 7921',
+		phoneNumber: '',
 		website: '',
 		address: '',
 		city: '',
-		postcode: ''
+		postcode: '',
 	};
+	
+	formRef = React.createRef();
 	
 	getBase64(img, callback) {
 		const reader = new FileReader();
@@ -24,52 +25,61 @@ class EditProfile extends Component {
 		reader.readAsDataURL(img);
 	}
 	
-	componentDidMount() {
+	async componentDidMount() {
 		const {match} = this.props;
 		const userId = match.params.userId;
-		UserService.getUserById(userId)
-			.then((user) => {
-				this.setState({
-					name: user.name,
-					email: user.email,
-					userName: user.username,
-					dateOfBirth: user.dateOfBirth,
-					phoneNumber: user.phoneNumber,
-					website: user.website,
-					address: user.address,
-					city: user.city,
-					postcode: user.postcode,
-					avatarUrl: user.avatarUrl,
-				});
-			})
-			.catch((error) => {
-				console.error('Ошибка при получении данных пользователя:', error);
-			});
+		try {
+			const user = await UserService.getUserById(userId);
+			this.setState(
+				{
+					name: user.name || '',
+					email: user.email || '',
+					userName: user.username || '',
+					phoneNumber: user.phone || '',
+					website: user.website || '',
+					address: user.address.city || '',
+					avatarUrl: user.avatarUrl || '',
+				},
+				() => {
+					// Set the initial values for the form after updating the state
+					this.formRef.current.setFieldsValue({
+						name: this.state.name,
+						email: this.state.email,
+						userName: this.state.userName,
+						phoneNumber: this.state.phoneNumber,
+						website: this.state.website,
+						address: this.state.address,
+					});
+				}
+			);
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+		}
 	}
 	
 	onFinish = (values) => {
 		const key = 'updatable';
 		message.loading({
 			content: 'Updating...',
-			key
+			key,
 		});
 		setTimeout(() => {
 			this.setState({
-				name: values.name,
-				email: values.email,
-				userName: values.userName,
-				dateOfBirth: values.dateOfBirth,
-				phoneNumber: values.phoneNumber,
-				website: values.website,
-				address: values.address,
-				city: values.city,
-				postcode: values.postcode,
+				name: values.name || '',
+				email: values.email || '',
+				userName: values.userName || '',
+				phoneNumber: values.phoneNumber || '',
+				website: values.website || '',
+				address: values.address || '',
 			});
 			message.success({
 				content: 'Done!',
 				key,
-				duration: 2
+				duration: 1,
 			});
+			
+			const {history} = this.props;
+			history.push('/app/main/clients/list');
 		}, 1000);
 	};
 	
@@ -83,27 +93,27 @@ class EditProfile extends Component {
 			message.loading({
 				content: 'Uploading...',
 				key,
-				duration: 1000
+				duration: 1000,
 			});
 			return;
 		}
 		if (info.file.status === 'done') {
-			this.getBase64(info.file.originFileObj, imageUrl =>
+			this.getBase64(info.file.originFileObj, (imageUrl) =>
 				this.setState({
 					avatarUrl: imageUrl,
-				}),
+				})
 			);
 			message.success({
 				content: 'Uploaded!',
 				key,
-				duration: 1.5
+				duration: 1.5,
 			});
 		}
 	};
 	
 	onRemoveAvatar = () => {
 		this.setState({
-			avatarUrl: ''
+			avatarUrl: '',
 		});
 	};
 	
@@ -118,47 +128,53 @@ class EditProfile extends Component {
 			address,
 			city,
 			postcode,
-			avatarUrl
 		} = this.state;
 		
 		return (
-			<>
-				<Flex alignItems="center" mobileFlex={false}
-				      className="text-center text-md-left">
-					<Avatar size={90} src={avatarUrl} icon={<UserOutlined/>}/>
-					<div className="ml-md-3 mt-md-0 mt-3">
-						<Upload onChange={this.onUploadAvatar} showUploadList={false}
-						        action={this.avatarEndpoint}>
-							<Button type="primary">Change Avatar</Button>
-						</Upload>
-						<Button className="ml-2"
-						        onClick={this.onRemoveAvatar}>Remove</Button>
-					</div>
-				</Flex>
-				<div className="mt-4">
-					<Form
-						name="basicInformation"
-						layout="vertical"
-						initialValues={{
-							'name': name,
-							'email': email,
-							'userName': userName,
-							'dateOfBirth': dateOfBirth,
-							'phoneNumber': phoneNumber,
-							'website': website,
-							'address': address,
-							'city': city,
-							'postcode': postcode
-						}}
-						onFinish={this.onFinish}
-						onFinishFailed={this.onFinishFailed}
-					>
-						{/* (ваш код формы) */}
-					</Form>
-				</div>
-			</>
+			<div className="mt-4">
+				<Form
+					name="basicInformation"
+					layout="vertical"
+					initialValues={{
+						name,
+						email,
+						userName,
+						dateOfBirth,
+						phoneNumber,
+						website,
+						address,
+						city,
+						postcode,
+					}}
+					onFinish={this.onFinish}
+					onFinishFailed={this.onFinishFailed}
+					ref={this.formRef}
+				>
+					<Form.Item label="Name" name="name">
+						<Input/>
+					</Form.Item>
+					<Form.Item label="Email" name="email">
+						<Input/>
+					</Form.Item>
+					<Form.Item label="Username" name="userName">
+						<Input/>
+					</Form.Item>
+					<Form.Item label="Phone Number" name="phoneNumber">
+						<Input/>
+					</Form.Item>
+					<Form.Item label="Website" name="website">
+						<Input/>
+					</Form.Item>
+					<Form.Item label="Address" name="address">
+						<Input/>
+					</Form.Item>
+					<Button type="primary" htmlType="submit">
+						Save
+					</Button>
+				</Form>
+			</div>
 		);
 	}
 }
 
-export default EditProfile;
+export default withRouter(EditProfile);
