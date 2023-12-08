@@ -1,10 +1,10 @@
 each({
   width: w;
   height: h;
-}, #(@abbrev, @prop)
+}, (@abbrev), @prop)
 
 {
-  each(@sizes, #(@length, @size)
+  each(@sizes, (@length), @size)
 
 {
 .@{abbrev}-@{size} {

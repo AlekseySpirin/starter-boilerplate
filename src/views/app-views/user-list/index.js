@@ -1,40 +1,54 @@
 import React, {Component} from 'react';
-import {Button, Card, message, Table, Tag, Tooltip} from 'antd';
+import {Button, Card, message, Table, Tooltip} from 'antd';
 import {DeleteOutlined, EyeOutlined} from '@ant-design/icons';
-import moment from 'moment';
+import axios from 'axios';
 import UserView from './UserView';
-import AvatarStatus from 'components/shared-components/AvatarStatus';
-import userData from "assets/data/user-list.data.json";
+import Loading from 'components/shared-components/Loading/index.js';
 
 export class UserList extends Component {
-	
 	state = {
-		users: userData,
+		users: [],
 		userProfileVisible: false,
-		selectedUser: null
+		selectedUser: null,
+		loading: true, // Add loading state
 	};
 	
-	deleteUser = userId => {
+	componentDidMount() {
+		axios
+			.get('https://jsonplaceholder.typicode.com/users')
+			.then((response) => {
+				this.setState({
+					users: response.data,
+					loading: false
+				});
+			})
+			.catch((error) => {
+				console.error('Ошибка при получении пользователей:', error);
+				this.setState({loading: false});
+			});
+	}
+	
+	deleteUser = (userId) => {
 		this.setState({
-			users: this.state.users.filter(item => item.id !== userId),
+			users: this.state.users.filter((item) => item.id !== userId),
 		});
 		message.success({
-			content: `Deleted user ${userId}`,
-			duration: 2
+			content: `Пользователь ${userId} удален`,
+			duration: 2,
 		});
 	};
 	
-	showUserProfile = userInfo => {
+	showUserProfile = (userInfo) => {
 		this.setState({
 			userProfileVisible: true,
-			selectedUser: userInfo
+			selectedUser: userInfo,
 		});
 	};
 	
 	closeUserProfile = () => {
 		this.setState({
 			userProfileVisible: false,
-			selectedUser: null
+			selectedUser: null,
 		});
 	};
 	
@@ -42,75 +56,76 @@ export class UserList extends Component {
 		const {
 			users,
 			userProfileVisible,
-			selectedUser
+			selectedUser,
+			loading
 		} = this.state;
 		
-		const tableColumns = [
-			{
-				title: 'User',
-				dataIndex: 'name',
-				render: (_, record) => (
-					<div className="d-flex">
-						<AvatarStatus src={record.img} name={record.name}
-						              subTitle={record.email}/>
-					</div>
-				),
-				sorter: {
-					compare: (a, b) => {
-						a = a.name.toLowerCase();
-						b = b.name.toLowerCase();
-						return a > b ? -1 : b > a ? 1 : 0;
-					},
-				},
-			},
-			{
-				title: 'Role',
-				dataIndex: 'role',
-				sorter: {
-					compare: (a, b) => a.role.length - b.role.length,
-				},
-			},
-			{
-				title: 'Last online',
-				dataIndex: 'lastOnline',
-				render: date => (
-					<span>{moment.unix(date).format("MM/DD/YYYY")} </span>
-				),
-				sorter: (a, b) => moment(a.lastOnline).unix() - moment(b.lastOnline).unix()
-			},
-			{
-				title: 'Status',
-				dataIndex: 'status',
-				render: status => (
-					<Tag className="text-capitalize"
-					     color={status === 'active' ? 'cyan' : 'red'}>{status}</Tag>
-				),
-				sorter: {
-					compare: (a, b) => a.status.length - b.status.length,
-				},
-			},
-			{
-				title: '',
-				dataIndex: 'actions',
-				render: (_, elm) => (
-					<div className="text-right">
-						<Tooltip title="View">
-							<Button type="primary" className="mr-2" icon={<EyeOutlined/>}
-							        onClick={() => {this.showUserProfile(elm);}} size="small"/>
-						</Tooltip>
-						<Tooltip title="Delete">
-							<Button danger icon={<DeleteOutlined/>}
-							        onClick={() => {this.deleteUser(elm.id);}} size="small"/>
-						</Tooltip>
-					</div>
-				)
+		// Display Loading component while fetching users
+		if (loading) {
+			return <Loading/>;
+		}
+		
+		const columns = Object.keys(users.length > 0 ? users[0] : {}).map((key) => {
+			if (key === 'address') {
+				return {
+					title: 'Адрес',
+					dataIndex: 'address',
+					key: 'address',
+					render: (address) => address?.city,
+				};
+			} else if (key === 'company') {
+				return {
+					title: 'Компания',
+					dataIndex: 'company',
+					key: 'company',
+					render: (company) => company?.name,
+				};
+			} else if (key !== 'id') {
+				return {
+					title: key.charAt(0).toUpperCase() + key.slice(1),
+					dataIndex: key,
+					key,
+					sorter: (a, b) => a[key] - b[key],
+				};
 			}
-		];
+			return null;
+		}).filter((column) => column !== null);
+		
+		columns.push({
+			title: 'Действия',
+			dataIndex: 'actions',
+			render: (_, elm) => (
+				<div className="text-right">
+					<Tooltip title="Просмотр">
+						<Button
+							type="primary"
+							className="mr-2"
+							icon={<EyeOutlined/>}
+							onClick={() => {
+								this.showUserProfile(elm);
+							}}
+							size="small"
+						/>
+					</Tooltip>
+					<Tooltip title="Удаление">
+						<Button
+							danger
+							icon={<DeleteOutlined/>}
+							onClick={() => {
+								this.deleteUser(elm.id);
+							}}
+							size="small"
+						/>
+					</Tooltip>
+				</div>
+			),
+		});
+		
 		return (
-			<Card bodyStyle={{'padding': '0px'}}>
-				<Table columns={tableColumns} dataSource={users} rowKey="id"/>
+			<Card bodyStyle={{padding: '0px'}}>
+				<Table columns={columns} dataSource={users} rowKey="id"/>
 				<UserView data={selectedUser} visible={userProfileVisible}
-				          close={() => {this.closeUserProfile();}}/>
+				          close={this.closeUserProfile}/>
 			</Card>
 		);
 	}

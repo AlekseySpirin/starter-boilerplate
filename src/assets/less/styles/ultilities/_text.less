@@ -140,7 +140,7 @@
   color: @white !important;
 }
 
-each(@theme-colors, #(@value, @color)
+each(@theme-colors, (@value), @color)
 
 {
   #text-emphasis-variant(~".text-@{color}", @value, true);

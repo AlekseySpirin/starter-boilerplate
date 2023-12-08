@@ -104,7 +104,7 @@
   height: 0.1875rem;
   margin-right: 0.5rem;
 
-  each(@colors-palette, #(@value, @color) {
+  each(@colors-palette, (@value), @color) {
 
   &.@{color} {
     background: @value;
