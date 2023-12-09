@@ -110,9 +110,7 @@ class UserList extends Component {
 							className="mr-2"
 							icon={<EditOutlined />}
 							size="small"
-						>
-							Edit
-						</Button>
+						/>
 					</Link>
 					<Tooltip title="Delete">
 						<Button
@@ -130,7 +128,7 @@ class UserList extends Component {
 		
 		return (
 			<Card bodyStyle={{ padding: '0px' }}>
-				<Table columns={columns} dataSource={users} rowKey="id" />
+				<Table columns={columns} dataSource={users} scroll={{ x: 'max-content' }} rowKey="id" />
 				<UserView data={selectedUser} visible={userProfileVisible} close={this.closeUserProfile} />
 			</Card>
 		);
