@@ -1,96 +1,141 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Image, Input, Row, Col } from 'antd';
+import React, {useEffect, useState} from 'react';
+import {Button, Col, Image, Input, Row} from 'antd';
 
 const GRID_SIZE = 10;
-const IMAGE_SIZE = 100;
+const IMAGE_SIZE = 50;
 
-const ObjectForm = ({ selectedObject, onSave, onDelete }) => {
-	const [formData, setFormData] = useState(selectedObject || {});
+const ObjectForm = ({
+	                    selectedObject,
+	                    onSave,
+	                    onDelete,
+	                    onClearBoard
+                    }) => {
+	const [x, setX] = useState(selectedObject?.x || 0);
+	const [y, setY] = useState(selectedObject?.y || 0);
+	const [rotation, setRotation] = useState(selectedObject?.rotation || 0);
+	const [width, setWidth] = useState(selectedObject?.width || IMAGE_SIZE);
+	const [height, setHeight] = useState(selectedObject?.height || IMAGE_SIZE);
+	const [layer, setLayer] = useState(selectedObject?.layer || 1);
+	
+	const isObjectOnBoard = !!selectedObject?.id;
+	
 	
 	useEffect(() => {
-		setFormData(selectedObject || {});
+		setX(selectedObject?.x || 0);
+		setY(selectedObject?.y || 0);
+		setRotation(selectedObject?.rotation || 0);
+		setWidth(selectedObject?.width || IMAGE_SIZE);
+		setHeight(selectedObject?.height || IMAGE_SIZE);
+		setLayer(selectedObject?.layer || 1);
 	}, [selectedObject]);
 	
-	const handleInputChange = (key, value) => {
-		setFormData((prevData) => ({
-			...prevData,
-			[key]: value,
-		}));
-	};
-	
 	const handleSave = () => {
-		onSave(formData);
+		onSave({
+			x,
+			y,
+			rotation,
+			width,
+			height,
+			layer,
+		});
 	};
 	
 	const handleDelete = () => {
 		onDelete(selectedObject.id);
 	};
+	const handleClearBoard = () => {
+		onClearBoard();
+	};
 	
 	return (
-		<div>
+		<div style={{marginTop: '15px'}}>
 			<h3>Edit Object</h3>
 			<div>
 				<label>X:</label>
-				<Input
-					type="number"
-					value={formData.x}
-					onChange={(e) => handleInputChange('x', e.target.value)}
-				/>
+				<Input type="number" value={x}
+				       onChange={(e) => setX(parseInt(e.target.value, 10))}/>
 			</div>
 			<div>
 				<label>Y:</label>
-				<Input
-					type="number"
-					value={formData.y}
-					onChange={(e) => handleInputChange('y', e.target.value)}
-				/>
+				<Input type="number" value={y}
+				       onChange={(e) => setY(parseInt(e.target.value, 10))}/>
 			</div>
 			<div>
 				<label>Rotation:</label>
-				<Input
-					type="number"
-					value={formData.rotation}
-					onChange={(e) => handleInputChange('rotation', e.target.value)}
-				/>
+				<Input type="number" value={rotation}
+				       onChange={(e) => setRotation(parseInt(e.target.value, 10))}/>
 			</div>
 			<div>
 				<label>Width:</label>
-				<Input
-					type="number"
-					value={formData.width}
-					onChange={(e) => handleInputChange('width', e.target.value)}
-				/>
+				<Input type="number" value={width}
+				       onChange={(e) => setWidth(parseInt(e.target.value, 10))}/>
 			</div>
 			<div>
 				<label>Height:</label>
-				<Input
-					type="number"
-					value={formData.height}
-					onChange={(e) => handleInputChange('height', e.target.value)}
-				/>
+				<Input type="number" value={height}
+				       onChange={(e) => setHeight(parseInt(e.target.value, 10))}/>
 			</div>
 			<div>
 				<label>Layer:</label>
-				<Input
-					type="number"
-					value={formData.layer}
-					onChange={(e) => handleInputChange('layer', e.target.value)}
-				/>
+				<Input type="number" value={layer}
+				       onChange={(e) => setLayer(parseInt(e.target.value, 10))}/>
 			</div>
-			<Button type="primary" onClick={handleSave}>
-				Save
-			</Button>
-			<Button type="danger" onClick={handleDelete}>
-				Delete
-			</Button>
+			<div className={'buttons__container'} style={{display: "flex", justifyContent: "space-between"}}>
+				<Button type="primary" onClick={handleSave}>
+					Save
+				</Button>
+				<Button type="danger" onClick={handleClearBoard}>
+					Clear Board
+				</Button>
+				<Button type="danger" onClick={handleDelete} disabled={!isObjectOnBoard}>
+					Delete
+				</Button>
+			</div>
+			
 		</div>
 	);
 };
 
 const Planner = () => {
-	const [objects, setObjects] = useState([
+	const objects = [
 		{
-			id: 1,
+			id: 11,
+			type: 'table',
+			image: '/img/planner/6th.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
+			id: 111,
+			type: 'table',
+			image: '/img/planner/6th.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
+			id: 1112,
+			type: 'table',
+			image: '/img/planner/6th.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
+			id: 11122,
+			type: 'table',
+			image: '/img/planner/6th.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
+			id: 111223,
 			type: 'table',
 			image: '/img/planner/6th.png',
 			width: IMAGE_SIZE,
@@ -108,6 +153,42 @@ const Planner = () => {
 			layer: 1,
 		},
 		{
+			id: 25,
+			type: 'decor',
+			image: '/img/planner/partition.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
+			id: 30,
+			type: 'greenery',
+			image: '/img/planner/partition.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
+			id: 22,
+			type: 'chair',
+			image: '/img/planner/partition.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
+			id: 23,
+			type: 'chair',
+			image: '/img/planner/partition.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
 			id: 3,
 			type: 'partition',
 			image: '/img/planner/chair.png',
@@ -116,19 +197,28 @@ const Planner = () => {
 			rotation: 0,
 			layer: 1,
 		},
-	]);
+	];
 	
 	const [boardObjects, setBoardObjects] = useState([]);
 	const [selectedSection, setSelectedSection] = useState('table');
 	const [selectedObject, setSelectedObject] = useState(null);
+	const [addedObject, setAddedObject] = useState(null);
+	
+	const clearBoard = () => {
+		setBoardObjects([]);
+		setSelectedObject(null);
+		setAddedObject(null);
+	};
+	
+	useEffect(() => {
+		if (addedObject) {
+			setBoardObjects((prevObjects) => [...prevObjects, addedObject]);
+			setAddedObject(null);
+		}
+	}, [addedObject]);
 	
 	const updateBoardObjects = (updatedObjects) => {
 		setBoardObjects(updatedObjects);
-		setObjects((prevObjects) =>
-			prevObjects.map((obj) =>
-				updatedObjects.find((uObj) => uObj.id === obj.id) || obj
-			)
-		);
 	};
 	
 	const moveObject = (index, deltaX, deltaY) => {
@@ -158,17 +248,28 @@ const Planner = () => {
 	};
 	
 	const dragStartHandler = (e, object, index) => {
-		const { offsetX, offsetY } = e.nativeEvent;
+		const {
+			offsetX,
+			offsetY
+		} = e.nativeEvent;
 		e.dataTransfer.setData(
 			'object',
-			JSON.stringify({ ...object, offsetX, offsetY, index })
+			JSON.stringify({
+				...object,
+				offsetX,
+				offsetY,
+				index
+			})
 		);
 	};
 	
 	const dropHandler = (e) => {
 		e.preventDefault();
 		const droppedObject = JSON.parse(e.dataTransfer.getData('object'));
-		const { pageX, pageY } = e;
+		const {
+			pageX,
+			pageY
+		} = e;
 		
 		const boardRect = e.target.getBoundingClientRect();
 		const offsetX = pageX - boardRect.left;
@@ -190,9 +291,21 @@ const Planner = () => {
 		);
 		
 		if (droppedObject.index !== undefined) {
+			const updatedObjects = boardObjects.map((obj, index) =>
+				index === droppedObject.index
+					? {
+						...obj,
+						x: deltaX,
+						y: deltaY,
+					}
+					: obj
+			);
+			
 			moveObject(droppedObject.index, deltaX, deltaY);
 			resizeObject(droppedObject.index, IMAGE_SIZE, IMAGE_SIZE);
 			changeLayer(droppedObject.index, 1);
+			
+			updateBoardObjects(updatedObjects);
 		} else {
 			const newId = Math.max(...boardObjects.map((obj) => obj.id), 0) + 1;
 			setBoardObjects((prevObjects) => [
@@ -209,6 +322,13 @@ const Planner = () => {
 				},
 			]);
 		}
+	};
+	
+	const deleteObject = (objectId) => {
+		setBoardObjects((prevObjects) =>
+			prevObjects.filter((obj) => obj.id !== objectId)
+		);
+		setSelectedObject(null);
 	};
 	
 	const dragEndHandler = (e) => {
@@ -243,76 +363,84 @@ const Planner = () => {
 	};
 	
 	const saveObjectChanges = (updatedData) => {
-		setObjects((prevObjects) =>
-			prevObjects.map((obj) =>
-				obj.id === selectedObject.id ? { ...obj, ...updatedData } : obj
-			)
-		);
-		
-		if (boardObjects.some((obj) => obj.id === selectedObject.id)) {
-			setBoardObjects((prevObjects) =>
-				prevObjects.map((obj) =>
-					obj.id === selectedObject.id ? { ...obj, ...updatedData } : obj
-				)
+		if (selectedObject) {
+			const updatedObjects = boardObjects.map((obj) =>
+				obj.id === selectedObject.id ? {...obj, ...updatedData} : obj
 			);
+			
+			setBoardObjects(updatedObjects);
+			setSelectedObject({...selectedObject, ...updatedData});
+		} else if (addedObject) {
+			setBoardObjects((prevObjects) => {
+				const updatedObjects = prevObjects.map((obj) =>
+					obj.id === addedObject.id ? addedObject : obj
+				);
+				return updatedObjects;
+			});
+			setAddedObject(null);
 		}
-		
-		setSelectedObject({ ...selectedObject, ...updatedData });
-	};
-	
-	const deleteObject = (objectId) => {
-		setBoardObjects((prevObjects) =>
-			prevObjects.filter((obj) => obj.id !== objectId)
-		);
-		setObjects((prevObjects) =>
-			prevObjects.filter((obj) => obj.id !== objectId)
-		);
-		setSelectedObject(null);
 	};
 	
 	return (
-		<div style={{ overflow: 'hidden' }}>
+		<div style={{overflow: 'hidden'}}>
 			<Row gutter={GRID_SIZE}>
-				<Col span={6} style={{ padding: '8px' }}>
-					<div className="section-buttons" style={{ marginBottom: '8px' }}>
+				<Col span={6} style={{padding: '8px'}}>
+					<div className="section-buttons" style={{
+						paddingBottom: '8px',
+						overflowX: 'auto',
+						whiteSpace: 'nowrap',
+					}}>
 						<Button onClick={() => setSelectedSection('table')}>Tables</Button>
 						<Button onClick={() => setSelectedSection('chair')}>Chairs</Button>
-						<Button onClick={() => setSelectedSection('partition')}>Partitions</Button>
+						<Button
+							onClick={() => setSelectedSection('partition')}>Partitions</Button>
+						<Button onClick={() => setSelectedSection('decor')}>Decor</Button>
+						<Button
+							onClick={() => setSelectedSection('greenery')}>Chairs</Button>
 					</div>
-					<div
-						className="object-list"
-						style={{
-							display: 'flex',
-							flexDirection: 'row',
-							flexWrap: 'wrap',
-							justifyContent: 'space-between',
-						}}
-					>
-						{filterObjectsByType(selectedSection).map((object) => (
-							<div
-								key={object.id}
-								onDragStart={(e) => dragStartHandler(e, object)}
-								draggable
-								className="object-item"
-								style={{ marginBottom: '8px' }}
-							>
-								<Image
-									src={object.image}
-									alt={object.type}
+					<div className="object-list__wrapper"
+					     style={{
+						     display: 'flex',
+						     flexDirection: 'row',
+						     flexWrap: 'wrap',
+						     justifyContent: 'center',
+					     }}>
+						<div className={'object-list'} style={{
+							display: "flex",
+							width: '100%',
+							overflowX: 'auto',
+							whiteSpace: 'nowrap',
+						}}>
+							{filterObjectsByType(selectedSection).map((object) => (
+								<div
+									key={object.id}
+									onDragStart={(e) => dragStartHandler(e, object)}
+									draggable
+									className="object-item"
 									style={{
-										width: IMAGE_SIZE,
-										height: IMAGE_SIZE,
-										userSelect: 'none',
-										cursor: 'grab',
+										margin: '8px',
+										fontSize: '10px'
 									}}
-									draggable={false}
-								/>
-							</div>
-						))}
+								>
+									<Image
+										src={object.image}
+										alt={object.type}
+										style={{
+											width: IMAGE_SIZE,
+											height: IMAGE_SIZE,
+											userSelect: 'none',
+											cursor: 'grab',
+										}}
+										draggable={false}
+									/>
+								</div>
+							))}
+						</div>
 						<ObjectForm
 							selectedObject={selectedObject}
 							onSave={saveObjectChanges}
 							onDelete={deleteObject}
+							onClearBoard={clearBoard}
 						/>
 					</div>
 				</Col>
@@ -323,7 +451,7 @@ const Planner = () => {
 							overflow: 'hidden',
 							position: 'relative',
 							maxWidth: '100%',
-							height: '400px', // Уменьшаем высоту контейнера
+							height: '400px', // Decrease the height of the container
 							border: '1px solid #ccc',
 						}}
 					>
@@ -373,7 +501,11 @@ const Planner = () => {
 										preview={false}
 										src={object.image}
 										alt={object.type}
-										style={{ width: object.width, height: object.height, userSelect: 'none' }}
+										style={{
+											width: object.width,
+											height: object.height,
+											userSelect: 'none'
+										}}
 										draggable={true}
 									/>
 								</div>
@@ -390,7 +522,7 @@ const Planner = () => {
 									border: '1px solid #ccc',
 								}}
 							>
-								{/* Дополнительные настройки для выбранного объекта */}
+								{/* Additional settings for the selected object */}
 							</div>
 						)}
 					</div>
