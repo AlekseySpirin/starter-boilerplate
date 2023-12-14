@@ -1,100 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, Image, Input, Row} from 'antd';
+import {Button, Col, Image, Row} from 'antd';
+import ObjectForm from './ObjectForm';
+import './styles/planner.css';
 
 const GRID_SIZE = 10;
 const IMAGE_SIZE = 50;
-
-const ObjectForm = ({
-	                    selectedObject,
-	                    onSave,
-	                    onDelete,
-	                    onClearBoard
-                    }) => {
-	const [x, setX] = useState(selectedObject?.x || 0);
-	const [y, setY] = useState(selectedObject?.y || 0);
-	const [rotation, setRotation] = useState(selectedObject?.rotation || 0);
-	const [width, setWidth] = useState(selectedObject?.width || IMAGE_SIZE);
-	const [height, setHeight] = useState(selectedObject?.height || IMAGE_SIZE);
-	const [layer, setLayer] = useState(selectedObject?.layer || 1);
-	
-	const isObjectOnBoard = !!selectedObject?.id;
-	
-	
-	useEffect(() => {
-		setX(selectedObject?.x || 0);
-		setY(selectedObject?.y || 0);
-		setRotation(selectedObject?.rotation || 0);
-		setWidth(selectedObject?.width || IMAGE_SIZE);
-		setHeight(selectedObject?.height || IMAGE_SIZE);
-		setLayer(selectedObject?.layer || 1);
-	}, [selectedObject]);
-	
-	const handleSave = () => {
-		onSave({
-			x,
-			y,
-			rotation,
-			width,
-			height,
-			layer,
-		});
-	};
-	
-	const handleDelete = () => {
-		onDelete(selectedObject.id);
-	};
-	const handleClearBoard = () => {
-		onClearBoard();
-	};
-	
-	return (
-		<div style={{marginTop: '15px'}}>
-			<h3>Edit Object</h3>
-			<div>
-				<label>X:</label>
-				<Input type="number" value={x}
-				       onChange={(e) => setX(parseInt(e.target.value, 10))}/>
-			</div>
-			<div>
-				<label>Y:</label>
-				<Input type="number" value={y}
-				       onChange={(e) => setY(parseInt(e.target.value, 10))}/>
-			</div>
-			<div>
-				<label>Rotation:</label>
-				<Input type="number" value={rotation}
-				       onChange={(e) => setRotation(parseInt(e.target.value, 10))}/>
-			</div>
-			<div>
-				<label>Width:</label>
-				<Input type="number" value={width}
-				       onChange={(e) => setWidth(parseInt(e.target.value, 10))}/>
-			</div>
-			<div>
-				<label>Height:</label>
-				<Input type="number" value={height}
-				       onChange={(e) => setHeight(parseInt(e.target.value, 10))}/>
-			</div>
-			<div>
-				<label>Layer:</label>
-				<Input type="number" value={layer}
-				       onChange={(e) => setLayer(parseInt(e.target.value, 10))}/>
-			</div>
-			<div className={'buttons__container'} style={{display: "flex", justifyContent: "space-between"}}>
-				<Button type="primary" onClick={handleSave}>
-					Save
-				</Button>
-				<Button type="danger" onClick={handleClearBoard}>
-					Clear Board
-				</Button>
-				<Button type="danger" onClick={handleDelete} disabled={!isObjectOnBoard}>
-					Delete
-				</Button>
-			</div>
-			
-		</div>
-	);
-};
 
 const Planner = () => {
 	const objects = [
@@ -136,6 +46,24 @@ const Planner = () => {
 		},
 		{
 			id: 111223,
+			type: 'table',
+			image: '/img/planner/6th.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
+			id: 111223444,
+			type: 'table',
+			image: '/img/planner/6th.png',
+			width: IMAGE_SIZE,
+			height: IMAGE_SIZE,
+			rotation: 0,
+			layer: 1,
+		},
+		{
+			id: 11122344444555,
 			type: 'table',
 			image: '/img/planner/6th.png',
 			width: IMAGE_SIZE,
@@ -248,10 +176,7 @@ const Planner = () => {
 	};
 	
 	const dragStartHandler = (e, object, index) => {
-		const {
-			offsetX,
-			offsetY
-		} = e.nativeEvent;
+		const { offsetX, offsetY } = e.nativeEvent;
 		e.dataTransfer.setData(
 			'object',
 			JSON.stringify({
@@ -266,27 +191,18 @@ const Planner = () => {
 	const dropHandler = (e) => {
 		e.preventDefault();
 		const droppedObject = JSON.parse(e.dataTransfer.getData('object'));
-		const {
-			pageX,
-			pageY
-		} = e;
+		const { pageX, pageY } = e;
 		
 		const boardRect = e.target.getBoundingClientRect();
 		const offsetX = pageX - boardRect.left;
 		const offsetY = pageY - boardRect.top;
 		
 		const deltaX = Math.min(
-			Math.max(
-				Math.floor((offsetX - droppedObject.offsetX) / GRID_SIZE) * GRID_SIZE,
-				0
-			),
+			Math.max(Math.floor((offsetX - droppedObject.offsetX) / GRID_SIZE) * GRID_SIZE, 0),
 			boardRect.width - GRID_SIZE
 		);
 		const deltaY = Math.min(
-			Math.max(
-				Math.floor((offsetY - droppedObject.offsetY) / GRID_SIZE) * GRID_SIZE,
-				0
-			),
+			Math.max(Math.floor((offsetY - droppedObject.offsetY) / GRID_SIZE) * GRID_SIZE, 0),
 			boardRect.height - GRID_SIZE
 		);
 		
@@ -365,72 +281,44 @@ const Planner = () => {
 	const saveObjectChanges = (updatedData) => {
 		if (selectedObject) {
 			const updatedObjects = boardObjects.map((obj) =>
-				obj.id === selectedObject.id ? {...obj, ...updatedData} : obj
+				obj.id === selectedObject.id ? { ...obj, ...updatedData } : obj
 			);
 			
 			setBoardObjects(updatedObjects);
-			setSelectedObject({...selectedObject, ...updatedData});
+			setSelectedObject({ ...selectedObject, ...updatedData });
 		} else if (addedObject) {
 			setBoardObjects((prevObjects) => {
-				const updatedObjects = prevObjects.map((obj) =>
+				return prevObjects.map((obj) =>
 					obj.id === addedObject.id ? addedObject : obj
 				);
-				return updatedObjects;
 			});
 			setAddedObject(null);
 		}
 	};
 	
 	return (
-		<div style={{overflow: 'hidden'}}>
+		<div className="planner-container">
 			<Row gutter={GRID_SIZE}>
-				<Col span={6} style={{padding: '8px'}}>
-					<div className="section-buttons" style={{
-						paddingBottom: '8px',
-						overflowX: 'auto',
-						whiteSpace: 'nowrap',
-					}}>
+				<Col span={6}>
+					<div className="section-buttons">
 						<Button onClick={() => setSelectedSection('table')}>Tables</Button>
 						<Button onClick={() => setSelectedSection('chair')}>Chairs</Button>
-						<Button
-							onClick={() => setSelectedSection('partition')}>Partitions</Button>
+						<Button onClick={() => setSelectedSection('partition')}>Partitions</Button>
 						<Button onClick={() => setSelectedSection('decor')}>Decor</Button>
-						<Button
-							onClick={() => setSelectedSection('greenery')}>Chairs</Button>
+						<Button onClick={() => setSelectedSection('greenery')}>Chairs</Button>
 					</div>
-					<div className="object-list__wrapper"
-					     style={{
-						     display: 'flex',
-						     flexDirection: 'row',
-						     flexWrap: 'wrap',
-						     justifyContent: 'center',
-					     }}>
-						<div className={'object-list'} style={{
-							display: "flex",
-							width: '100%',
-							overflowX: 'auto',
-							whiteSpace: 'nowrap',
-						}}>
+					<div className="object-list__wrapper">
+						<div className="object-list">
 							{filterObjectsByType(selectedSection).map((object) => (
 								<div
 									key={object.id}
 									onDragStart={(e) => dragStartHandler(e, object)}
 									draggable
 									className="object-item"
-									style={{
-										margin: '8px',
-										fontSize: '10px'
-									}}
 								>
 									<Image
 										src={object.image}
 										alt={object.type}
-										style={{
-											width: IMAGE_SIZE,
-											height: IMAGE_SIZE,
-											userSelect: 'none',
-											cursor: 'grab',
-										}}
 										draggable={false}
 									/>
 								</div>
@@ -445,31 +333,13 @@ const Planner = () => {
 					</div>
 				</Col>
 				<Col span={18}>
-					<div
-						className="board-container"
-						style={{
-							overflow: 'hidden',
-							position: 'relative',
-							maxWidth: '100%',
-							height: '400px', // Decrease the height of the container
-							border: '1px solid #ccc',
-						}}
-					>
+					<div className="board-container">
 						<div
 							className="board"
 							onDragOver={(e) => dragOverHandler(e)}
 							onDragLeave={(e) => dragLeaveHandler(e)}
 							onDrop={(e) => dropHandler(e)}
 							onClick={() => setSelectedObject(null)}
-							style={{
-								background:
-									'repeating-linear-gradient(0 10px, transparent 10px, lightgray 10px), repeating-linear-gradient(90deg 10px, transparent 10px, lightgray 10px)',
-								width: '100%',
-								height: '100%',
-								position: 'absolute',
-								top: '0',
-								left: '0',
-							}}
 						>
 							{boardObjects.map((object, index) => (
 								<div
@@ -501,11 +371,7 @@ const Planner = () => {
 										preview={false}
 										src={object.image}
 										alt={object.type}
-										style={{
-											width: object.width,
-											height: object.height,
-											userSelect: 'none'
-										}}
+										style={{ width: object.width, height: object.height, userSelect: 'none' }}
 										draggable={true}
 									/>
 								</div>
@@ -513,6 +379,7 @@ const Planner = () => {
 						</div>
 						{selectedObject && (
 							<div
+								className="selected-object-settings"
 								style={{
 									position: 'absolute',
 									bottom: 0,
